@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">SemIoT Device App</string>
+    <string name="find_devices">Найти устройства</string>
+    <string name="save_configuration">Сохранить конфигурацию</string>
+    <string name="load_configuration">Загрузить конфигурацию</string>
+    <string name="failed_to_get_configuration">Ошибка загрузки конфигурации!</string>
+    <string name="wifi_not_connected">Не подключен к устройству!</string>
+</resources>
