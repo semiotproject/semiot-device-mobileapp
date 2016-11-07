@@ -4,9 +4,12 @@ import org.eclipse.californium.core.CoapResponse;
 
 public abstract class CoapRequestCallback {
 
-    public void onResponse(CoapResponse response) {}
+    public void onResponse(CoapResponse response) {
+    }
 
-    public void onError() {}
+    public void onError() {
+    }
 
-    public void onComplete() {}
+    public void onComplete() {
+    }
 }

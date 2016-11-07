@@ -19,7 +19,7 @@ public class CoapRequest extends AsyncTask<String, Void, CoapResponse> {
     @Override
     protected CoapResponse doInBackground(String... args) {
         CoapClient client = new CoapClient(args[0]);
-        if(args.length > 1) {
+        if (args.length > 1) {
             CoAP.Code method = CoAP.Code.valueOf(args[1]);
             switch (method) {
                 case GET:
