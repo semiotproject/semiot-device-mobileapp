@@ -21,18 +21,24 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import org.eclipse.californium.core.CoapClient;
+import org.eclipse.californium.core.CoapResponse;
+import org.eclipse.californium.core.WebLink;
 import org.eclipse.californium.core.coap.CoAP;
+import org.eclipse.californium.core.coap.LinkFormat;
 import org.eclipse.californium.core.coap.Request;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 import ru.semiot.semiotdeviceapp.BroadcastCallback;
 import ru.semiot.semiotdeviceapp.CustomMessageObserver;
 import ru.semiot.semiotdeviceapp.R;
+import ru.semiot.semiotdeviceapp.RDService;
 import ru.semiot.semiotdeviceapp.ScrollDetectingListView;
-import ru.semiot.semiotdeviceapp.Utils;
 
 public class MainActivity extends AppCompatActivity implements BroadcastCallback {
 
@@ -40,12 +46,15 @@ public class MainActivity extends AppCompatActivity implements BroadcastCallback
     private HashMap<String, Pair<String, String>> devices;
     private ScrollDetectingListView listDevices;
     ArrayAdapter<String> adapter;
-
+    //ResourceDirectory resourceDirectory;
     private GoogleApiClient client;
+    private Intent background;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        background = new Intent(this, RDService.class);
+        startService(background);
         setContentView(R.layout.activity_main);
 
         final WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
@@ -66,11 +75,13 @@ public class MainActivity extends AppCompatActivity implements BroadcastCallback
                 Pair<String, String> pair = getDevice(label);
                 id = pair.first;
                 uri = pair.second;
-                JSONObject json = Utils.getSettingsByDeviceId(Utils.readFile(that), id);
+                /*JSONObject json = Utils.getSettingsByDeviceId(Utils.readFile(that), id);
                 if (json == null)
                     ;// TODO: We should ask user about username and password and offer to save it
                 user = json.optString("username");
                 pass = json.optString("password");
+                */
+                startActivity(new Intent(that, TestimonyActivity.class).putExtra(Intent.EXTRA_TEXT, uri));
             }
         });
         listDevices.setOnScrollListener(new AbsListView.OnScrollListener() {
@@ -138,6 +149,13 @@ public class MainActivity extends AppCompatActivity implements BroadcastCallback
         request.setURI(broadcastUri).setMulticast(true);
         request.addMessageObserver(new CustomMessageObserver(this));
         request.send();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                appendSleepingDevice();
+            }
+        }).run();
+
     }
 
     @Override
@@ -145,6 +163,7 @@ public class MainActivity extends AppCompatActivity implements BroadcastCallback
         super.onStop();
         adapter.clear();
         devices.clear();
+        stopService(background);
         Action viewAction = Action.newAction(
                 Action.TYPE_VIEW,
                 "Main Page",
@@ -153,6 +172,47 @@ public class MainActivity extends AppCompatActivity implements BroadcastCallback
         );
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
+    }
+
+    private void appendSleepingDevice() {
+        String URI = Formatter.formatIpAddress(((WifiManager) getSystemService(Context.WIFI_SERVICE)).getDhcpInfo().ipAddress);
+        URI = "coap://" + URI /*+ "/.well-known/core?rt=core.rd-cache"*/;
+        final int count = 10;
+        int i = 0;
+        CoapClient cl = new CoapClient();
+
+        CoapResponse resp;
+        cl.setURI(URI + "/.well-known/core?rt=core.rd-cache");
+        do {
+            if (i >= count) {
+                return;
+            }
+            i++;
+            resp = cl.get();
+        } while (resp == null);
+        String rdCachePath = LinkFormat.parse(resp.getResponseText())
+                .toArray(new WebLink[]{})[0].getURI();
+        i = 0;
+        cl.setURI(URI + rdCachePath);
+        do {
+            if (i >= count) {
+                return;
+            }
+            i++;
+            resp = cl.get();
+        } while (resp == null);
+
+        Set<WebLink> res = LinkFormat.parse(resp.getResponseText());
+        for (WebLink link : res) {
+            JSONObject json = null;
+            try {
+                json = new JSONObject(cl.setURI(URI + rdCachePath + link.getURI()).get().getResponseText());
+                this.addDevice(URI + rdCachePath + link.getURI(),
+                        json.getString("identifier"),
+                        json.getJSONObject("label").getString("@value"));
+            } catch (JSONException e) {
+            }
+        }
     }
 
     private Pair<String, String> getDevice(String label) {

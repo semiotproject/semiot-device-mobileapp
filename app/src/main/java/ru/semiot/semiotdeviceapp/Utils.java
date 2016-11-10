@@ -76,6 +76,7 @@ public class Utils {
     }
 
     public static JSONObject getSettingsByDeviceId(JSONArray array, String id) {
+        if (array == null) return null;
         JSONObject obj = null;
         for (int i = 0; i < array.length(); i++) {
             if (array.optJSONObject(i).optString("id").equalsIgnoreCase(id)) {

@@ -5,12 +5,8 @@ import android.util.Log;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MessageObserver;
 import org.eclipse.californium.core.coap.Response;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class CustomMessageObserver implements MessageObserver {
 
@@ -34,7 +30,7 @@ public class CustomMessageObserver implements MessageObserver {
             try {
                 Log.d(LOG_TAG, response.getPayloadString());
                 JSONObject json = new JSONObject(response.getPayloadString());
-                callback.addDevice(response.getSource().toString(),
+                callback.addDevice(buildURI(response.getSource().toString(), response.getSourcePort()),
                         json.getString("identifier"),
                         json.getJSONObject("label").getString("@value"));
             } catch (JSONException e) {
@@ -67,5 +63,9 @@ public class CustomMessageObserver implements MessageObserver {
 
     public void setCallback(BroadcastCallback callback) {
         this.callback = callback;
+    }
+
+    private String buildURI(String source, int port) {
+        return "coap://" + source.substring(1) + ":" + port;
     }
 }
