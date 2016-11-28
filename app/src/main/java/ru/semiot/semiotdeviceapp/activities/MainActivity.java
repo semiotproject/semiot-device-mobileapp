@@ -9,9 +9,12 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.util.Pair;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -50,18 +53,27 @@ public class MainActivity extends AppCompatActivity implements BroadcastCallback
     private GoogleApiClient client;
     private Intent background;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        background = new Intent(this, RDService.class);
-        startService(background);
+        //background = new Intent(this, RDService.class);
+        //startService(background);
         setContentView(R.layout.activity_main);
+        //LayoutInflater inflater = (LayoutInflater) this
+        //        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        //Toolbar toolbar = (Toolbar) inflater.inflate(R.layout.toolbar, null, false).findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        //Log.d(LOG_TAG,toolbar.getTitle().toString());
+        toolbar.setTitle(R.string.app_name);
+        setSupportActionBar(toolbar);
 
         final WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         if (!wifiManager.isWifiEnabled() || !wifiManager.getConnectionInfo().getSupplicantState().equals(SupplicantState.COMPLETED)) {
             startActivity(new Intent(this, WifiActivity.class).putExtra(Intent.EXTRA_TEXT, "isFirst"));
         }
-        devices = new HashMap<>();
+        devices = new HashMap<String, Pair<String, String>>();
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
         listDevices = (ScrollDetectingListView) findViewById(R.id.listDevices);
 
@@ -149,13 +161,13 @@ public class MainActivity extends AppCompatActivity implements BroadcastCallback
         request.setURI(broadcastUri).setMulticast(true);
         request.addMessageObserver(new CustomMessageObserver(this));
         request.send();
-        new Thread(new Runnable() {
+        /*new Thread(new Runnable() {
             @Override
             public void run() {
                 appendSleepingDevice();
             }
         }).run();
-
+*/
     }
 
     @Override
@@ -163,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements BroadcastCallback
         super.onStop();
         adapter.clear();
         devices.clear();
-        stopService(background);
+        //stopService(background);
         Action viewAction = Action.newAction(
                 Action.TYPE_VIEW,
                 "Main Page",
@@ -174,9 +186,9 @@ public class MainActivity extends AppCompatActivity implements BroadcastCallback
         client.disconnect();
     }
 
-    private void appendSleepingDevice() {
+    /*private void appendSleepingDevice() {
         String URI = Formatter.formatIpAddress(((WifiManager) getSystemService(Context.WIFI_SERVICE)).getDhcpInfo().ipAddress);
-        URI = "coap://" + URI /*+ "/.well-known/core?rt=core.rd-cache"*/;
+        URI = "coap://" + URI;
         final int count = 10;
         int i = 0;
         CoapClient cl = new CoapClient();
@@ -213,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements BroadcastCallback
             } catch (JSONException e) {
             }
         }
-    }
+    }*/
 
     private Pair<String, String> getDevice(String label) {
         String id, uri;

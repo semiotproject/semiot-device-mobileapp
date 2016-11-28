@@ -24,7 +24,6 @@ import org.eclipse.californium.core.coap.Request;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.IllegalFormatException;
 import java.util.Iterator;
 
 import ru.semiot.semiotdeviceapp.CoapRequest;
@@ -94,7 +93,7 @@ public class ConfigurationActivity extends AppCompatActivity implements View.OnC
                     child.setTag(key);
                     fillLayout(json.getJSONObject(key), child);
                 } else {
-                    LinearLayout row = (LinearLayout) inflater.inflate(R.layout.row, null, false);
+                    LinearLayout row = (LinearLayout) inflater.inflate(R.layout.editable_row, null, false);
                     ((TextView) row.findViewById(R.id.key)).setText(key);
                     ((EditText) row.findViewById(R.id.value)).setTag(key);
                     ((EditText) row.findViewById(R.id.value)).setText(json.get(key).toString());

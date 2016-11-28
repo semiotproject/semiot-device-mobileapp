@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:my_menu="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_search"
+        my_menu:showAsAction="always|collapseActionView"
+        my_menu:actionViewClass="android.support.v7.widget.SearchView" />
+    <item
+        android:id="@+id/action_edit"
+        my_menu:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_micro"
+        my_menu:showAsAction="always" />
+    <item
+        android:id="@+id/action_remove"
+        my_menu:showAsAction="always" />
+    <item
+        android:id="@+id/action_sort"
+        my_menu:showAsAction="always" />
+</menu>

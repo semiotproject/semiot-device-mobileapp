@@ -7,7 +7,7 @@
         android:text="Text"
         android:layout_height="wrap_content"
         android:id="@+id/listId"
-        android:layout_width="150dp"
+        android:layout_width="wrap_content"
         android:textStyle="normal|italic" />
 
     <LinearLayout
